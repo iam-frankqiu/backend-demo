@@ -1,5 +1,6 @@
 import { writeFile, readFile } from 'node:fs/promises';
 import { join } from 'path';
+import * as http from 'http';
 
 export async function writeDataToFile(data, type) {
   try {
@@ -24,4 +25,26 @@ export async function readDataFromFile(type) {
     console.error(err);
     return null;
   }
+}
+
+export async function getData(url) {
+  return new Promise((resolve, reject) => {
+    http
+      .get(url, (res) => {
+        let data = '';
+
+        // 数据块到达
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        // 整个响应都被接收
+        res.on('end', () => {
+          resolve(data);
+        });
+      })
+      .on('error', (err) => {
+        reject(err);
+      });
+  });
 }

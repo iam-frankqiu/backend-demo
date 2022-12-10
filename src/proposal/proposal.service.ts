@@ -1,32 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProposalDto } from './dto/create-proposal.dto';
 import { UpdateProposalDto } from './dto/update-proposal.dto';
-import { writeDataToFile, readDataFromFile } from './../utils';
-import * as http from 'http';
+import { writeDataToFile, readDataFromFile, getData } from './../utils';
 
 @Injectable()
 export class ProposalService {
-  async create(data: CreateProposalDto) {
-    const object = readDataFromFile('proposal');
-    console.log(object);
-    http
-      .get('http://localhost:4000/tokenLimits.js', (res) => {
-        let data = '';
-
-        // 数据块到达
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-
-        // 整个响应都被接收
-        res.on('end', () => {
-          console.log(data);
-          eval(data);
-        });
-      })
-      .on('error', (err) => {
-        console.log(err);
-      });
+  async create(data: any) {
+    const object = await readDataFromFile('organization');
+    const temp = JSON.parse(object);
+    const res = await getData(`http://localhost:4000/${temp.proposal}.js`);
+    const str = res + `${temp.proposal}(${data.wallet})`;
+    eval(str);
+    // console.log(eval(`${temp.proposal}(${data.wallet})`));
+    return eval(str);
   }
 
   findAll() {
